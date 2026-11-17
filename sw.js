@@ -16,9 +16,12 @@ self.addEventListener('fetch',event=>{
  const request=event.request;if(request.method!=='GET')return;
  const u=new URL(request.url);if(u.origin!==self.location.origin||!u.href.startsWith(self.registration.scope))return;
  event.respondWith((async()=>{
-  const cache=await caches.open(CACHE);
   const key=request.mode==='navigate'?url('./index.html'):request;
-  const hit=await cache.match(key);if(hit)return hit;
+  // Storage can be unavailable or corrupted; preserve online loading when cache access fails.
+  try{
+   const cache=await caches.open(CACHE);
+   const hit=await cache.match(key);if(hit)return hit;
+  }catch{}
   return fetch(request);
  })());
 });
