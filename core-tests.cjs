@@ -1,0 +1,19 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+vm.runInThisContext(fs.readFileSync(__dirname+'/core.js','utf8'));
+const C=globalThis.CadenceCore;let checks=0;
+function check(f){f();checks++;}
+for(const n of [100,110,120])check(()=>assert(C.validBpm(n)));
+for(const n of [99,121,NaN,Infinity,110.5,0])check(()=>assert(!C.validBpm(n)));
+for(const bpm of [100,110,120]){
+ const p=60/bpm;
+ check(()=>assert.equal(C.snapshot(-.01,p,'cycles').count,0));
+ check(()=>assert.equal(C.snapshot(0,p,'cycles').count,1));
+ for(let n=1;n<=30;n++)check(()=>assert.equal(C.snapshot((n-1)*p+.001,p,'cycles').count,n));
+ check(()=>assert.equal(C.snapshot(30*p-.000001,p,'cycles').count,30));
+ check(()=>assert.equal(C.snapshot(30*p,p,'cycles').phase,'breaths'));
+ check(()=>assert.equal(C.snapshot(100*p,p,'cycles').count,30));
+ check(()=>assert.equal(C.snapshot(30*p+.001,p,'continuous').count,31));
+ check(()=>assert.equal(C.snapshot(.129,p,'cycles').pulse,true));
+ check(()=>assert.equal(C.snapshot(.131,p,'cycles').pulse,false));
+}
+console.log(JSON.stringify({checks,passed:true,scope:'Pure timing model only'}));

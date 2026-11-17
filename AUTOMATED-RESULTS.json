@@ -1,0 +1,44 @@
+{
+  "node_available": true,
+  "checks": [
+    {
+      "name": "syntax core.js",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "syntax app.js",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "syntax sw.js",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "syntax core-tests.cjs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing model",
+      "pass": true,
+      "detail": "{\"checks\":123,\"passed\":true,\"scope\":\"Pure timing model only\"}"
+    },
+    {
+      "name": "unique HTML IDs",
+      "pass": true
+    },
+    {
+      "name": "local HTML assets exist",
+      "pass": true
+    },
+    {
+      "name": "manifest icons exist",
+      "pass": true
+    }
+  ],
+  "browser_tests": "NOT RUN",
+  "clinical_validation": "NOT RUN"
+}
