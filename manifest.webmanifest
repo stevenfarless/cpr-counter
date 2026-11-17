@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "CPR Cadence \u2014 Dispatcher Reference",
-  "short_name": "CPR Cadence",
-  "description": "Prototype offline dispatcher cadence reference with manual breath phases.",
+  "name": "CPR Counter \u2014 Dispatcher Reference",
+  "short_name": "CPR Counter",
+  "description": "Prototype offline dispatcher counter reference with manual breath phases.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='2.0.0', Core=globalThis.CadenceCore;
+const VERSION='2.0.1', Core=globalThis.CadenceCore;
 const ids=['offline','network','lockStatus','panel','pulse','round','count','denominator','phase','rateLabel','breathTime','action','stop','message','bpm','minus','plus','mode','theme','sound','visual','volume','gainValue','testSound','install','fullscreen','update','refreshOffline'];
 const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
 let state='idle',round=1,count=0,mode='cycles',sound=false,visual=true;
@@ -7,6 +7,7 @@ let ctx=null,master=null,tone=null,epoch=0,period=60/110,nextBeat=0,raf=0,lastFr
 let generation=0,releaseLock=null,wake=null,installPrompt=null,registration=null,testNode=null;
 const sources=new Set();
 function message(s){el.message.textContent=s;}
+// Keep the existing key so preferences survive the CPR Cadence -> CPR Counter rename.
 function save(){try{localStorage.setItem('cadence-prefs',JSON.stringify({theme:el.theme.value,volume:Number(el.volume.value)}));}catch{}}
 try{const p=JSON.parse(localStorage.getItem('cadence-prefs')||'{}');if(['teal','blue','sage','lavender','amber'].includes(p.theme))el.theme.value=p.theme;if(Number.isFinite(p.volume)&&p.volume>=.05&&p.volume<=.7)el.volume.value=p.volume;}catch{}
 document.body.dataset.theme=el.theme.value;
@@ -29,7 +30,7 @@ function render(){
 }
 function cancelAudio(){
  for(const node of sources){try{node.stop();}catch{}node.disconnect();}sources.clear();
- if(testNode){try{testNode.stop();}catch{}testNode=null;}
+ if(testNode){const node=testNode;testNode=null;try{node.stop();}catch{}try{node.disconnect();}catch{}}
 }
 function stop(reason='Stopped. A new Start resets the round and cue count.',fault=false){
  generation++;state=fault?'fault':'stopped';cancelAnimationFrame(raf);cancelAudio();el.pulse.style.opacity=0;
@@ -49,6 +50,7 @@ async function prepareAudio(){
  await ctx.resume();if(ctx.state!=='running')throw Error('Audio clock did not start.');
  master.gain.setValueAtTime(sound?Number(el.volume.value):0,ctx.currentTime);
 }
+// Keep this lock name stable so older CPR Cadence windows still coordinate during upgrades.
 async function acquireLock(token){
  if(!navigator.locks){el.lockStatus.textContent='Duplicate-instance lock unavailable';return;}
  await new Promise((resolve,reject)=>{
@@ -132,7 +134,16 @@ el.volume.addEventListener('input',()=>{if(master&&sound)master.gain.setTargetAt
 el.testSound.addEventListener('click',async()=>{
  if(active())return;if(!sound){message('Enable Sound first, then test the selected output device.');return;}
  const token=generation;
- try{await prepareAudio();if(active()||token!==generation)return;cancelAudio();testNode=ctx.createBufferSource();testNode.buffer=tone;testNode.connect(master);testNode.start(ctx.currentTime+.03);message('Test tone requested. Confirm that you heard it on the intended device.');}catch(e){message('Sound test failed: '+e.message);}
+ try{
+  await prepareAudio();
+  if(active()||token!==generation)return;
+  if(!sound){message('Sound was disabled before the test tone could start.');return;}
+  cancelAudio();
+  const node=ctx.createBufferSource();testNode=node;node.buffer=tone;node.connect(master);
+  node.onended=()=>{try{node.disconnect();}catch{}if(testNode===node)testNode=null;};
+  node.start(ctx.currentTime+.03);
+  message('Test tone requested. Confirm that you heard it on the intended device.');
+ }catch(e){message('Sound test failed: '+e.message);}
 });
 el.fullscreen.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{message('Full screen unavailable. Maximize this window instead.');}});
 document.addEventListener('fullscreenchange',()=>{el.fullscreen.textContent=document.fullscreenElement?'Exit full screen':'Full screen';});
@@ -146,15 +157,31 @@ function network(){el.network.textContent=navigator.onLine?'Network reported onl
 window.addEventListener('online',network);window.addEventListener('offline',network);network();
 el.lockStatus.textContent=navigator.locks?'Same-profile session lock available':'Duplicate-instance lock unavailable';
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;el.install.hidden=false;});
-el.install.addEventListener('click',async()=>{if(active()){message('Stop the session before installing.');return;}if(installPrompt){await installPrompt.prompt();installPrompt=null;el.install.hidden=true;}});
+el.install.addEventListener('click',async()=>{
+ if(active()){message('Stop the session before installing.');return;}
+ const prompt=installPrompt;if(!prompt)return;installPrompt=null;
+ try{
+  await prompt.prompt();
+  const choice=await prompt.userChoice;
+  el.install.hidden=true;
+  message(choice?.outcome==='accepted'?'App installation accepted.':'Installation dismissed.');
+ }catch(e){el.install.hidden=true;message('Installation prompt failed: '+e.message);}
+});
 window.addEventListener('appinstalled',()=>{el.install.hidden=true;});
 async function checkOffline(){
  if(!navigator.serviceWorker?.controller){el.offline.textContent='Offline readiness not verified';return;}
  el.offline.textContent='Checking cached files…';
- const channel=new MessageChannel();
- const result=await new Promise(resolve=>{const timeout=setTimeout(()=>resolve(null),4000);channel.port1.onmessage=e=>{clearTimeout(timeout);resolve(e.data);};navigator.serviceWorker.controller.postMessage({type:'VERIFY'},[channel.port2]);});
- channel.port1.close();
- el.offline.textContent=result?.ready&&result.version===VERSION?'Offline files verified · v'+VERSION:'Offline files not verified';
+ let channel=null,timeout=null;
+ try{
+  channel=new MessageChannel();
+  const result=await new Promise(resolve=>{
+   timeout=setTimeout(()=>resolve(null),4000);
+   channel.port1.onmessage=e=>{clearTimeout(timeout);resolve(e.data);};
+   navigator.serviceWorker.controller.postMessage({type:'VERIFY'},[channel.port2]);
+  });
+  el.offline.textContent=result?.ready&&result.version===VERSION?'Offline files verified · v'+VERSION:'Offline files not verified';
+ }catch{el.offline.textContent='Offline check failed';}
+ finally{if(timeout)clearTimeout(timeout);try{channel?.port1.close();}catch{}}
 }
 el.refreshOffline.addEventListener('click',checkOffline);
 async function setupWorker(){
