@@ -1,4 +1,4 @@
-# CPR Cadence PWA — prototype v2.0.0
+# CPR Counter PWA — prototype v2.0.1
 
 UNVALIDATED PROTOTYPE. Do not rely on this package for operational CPR dispatch without agency clinical approval, independent engineering review, and measured workstation validation. No medical-device certification is claimed.
 
@@ -31,6 +31,8 @@ Web Locks prevents concurrent sessions only where supported within the same orig
 If a session is interrupted, restarting resets round and count. The dispatcher must reconcile with the caller under agency procedure. If the caller resumes before the dispatcher clicks Resume, displayed counts will be behind. The app cannot detect this.
 
 ## Offline and updates
+
+The app is branded CPR Counter. The existing browser preference key and Web Lock name are intentionally retained for compatibility with already-installed CPR Cadence windows; close older windows before applying an update. The service-worker cache uses a new CPR Counter version namespace.
 
 All runtime assets are local. No analytics or remote services. First service-worker activation claims the page after precaching. Later versions wait for an explicit stopped-state update click. No automatic reload on controller change. Browser cache clearing, storage eviction, and software updates can remove/change this environment. A closed app may adopt a waiting worker on next launch, which always begins stopped. Close other windows before applying updates. Active windows from different versions are unsupported.
 

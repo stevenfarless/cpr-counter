@@ -3,6 +3,10 @@
 Owner, agency protocol, approved users, workstation OS/build, browser/build, display refresh, audio device, app release/hash, reviewer, date, and pass/fail evidence must be recorded. Agency clinical and technical leads must define acceptance limits BEFORE measurement. Do not infer acceptance from an absence of JavaScript errors.
 
 ## Functional cases
+- Test sound is cleaned up after playback, cancellation, rapid repeated activation, and sound being disabled during asynchronous audio preparation.
+- Install prompt dismissal, acceptance, unavailable prompt, and rejected prompt do not leave an unhandled rejection.
+- Offline verification handles a missing controller, worker message timeout, message-channel failure, and repeated checks without an uncaught rejection.
+- Timing-model input rejects non-finite elapsed time, non-finite or non-positive periods, and unknown modes.
 - Fresh launch always stopped, 110 BPM, muted, pulse on; persisted theme/gain restored safely.
 - Invalid/empty/fractional/out-of-range cadence rejected; input at 100 and 120 accepted.
 - Correct cue and round progression at 100/110/120; cue 30 receives a full interval.

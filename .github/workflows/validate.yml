@@ -1,0 +1,51 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check core.js
+          node --check sw.js
+          node --check core-tests.cjs
+      - name: Run timing model tests
+        run: node core-tests.cjs
+      - name: Validate local assets, manifest, and HTML identifiers
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
+          const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+          if (duplicates.length) throw new Error('Duplicate HTML IDs: ' + [...new Set(duplicates)].join(', '));
+          for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+            const asset = match[1];
+            if (/^(?:https?:|data:|#)/i.test(asset)) continue;
+            const path = asset.split(/[?#]/, 1)[0];
+            if (path && !fs.existsSync(path)) throw new Error('Missing local asset: ' + path);
+          }
+          const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+          for (const icon of manifest.icons || []) {
+            if (!fs.existsSync(icon.src)) throw new Error('Missing manifest icon: ' + icon.src);
+          }
+          if (!html.includes('<title>CPR Counter</title>')) throw new Error('HTML title is not CPR Counter');
+          if (manifest.short_name !== 'CPR Counter') throw new Error('Manifest short_name is not CPR Counter');
+          console.log('HTML IDs, local assets, manifest JSON, and app branding passed.');
+          NODE
