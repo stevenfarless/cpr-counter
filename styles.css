@@ -104,3 +104,10 @@ body[data-theme="amber"] { --cue: #886b43; --edge: #c9ab7b; --button: #e0c598; }
   .settings { grid-template-columns: 1fr; }
   .sub { font-size: .7rem; }
 }
+
+/* Hide Full screen on mobile/tablet layouts and touch-first devices. */
+@media (max-width: 1024px), (pointer: coarse) {
+  #fullscreen {
+    display: none;
+  }
+}
