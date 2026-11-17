@@ -1,20 +1,121 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10191f"><meta name="description" content="Offline CPR counter reference prototype with dispatcher-controlled breath phases."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><link rel="stylesheet" href="styles.css"><title>CPR Counter</title><script src="core.js" defer></script><script src="app.js" defer></script></head>
-<body><main>
-<header><div><h1>CPR Counter</h1><span class="sub">Dispatcher reference · prototype v2.0.1</span></div><div class="headerActions"><button id="install" hidden>Install app</button><button id="fullscreen">Full screen</button></div></header>
-<div class="badges"><span id="offline">Checking offline files…</span><span id="network"></span><span id="lockStatus"></span></div>
-<section id="panel" aria-label="Metronome visual cue"><div id="pulse"></div><div id="round">Round 1</div><div class="count"><span id="count">—</span><span id="denominator"> / 30</span></div><div id="phase">Ready</div><div id="rateLabel">110 compressions / min</div><div id="breathTime" hidden></div></section>
-<div class="transport"><button id="action" class="primary">Start · Round 1</button><button id="stop" disabled>Stop</button></div>
-<p id="message" role="status" aria-live="polite">Ready. Keep this window visible on the secondary monitor.</p>
-<div class="settings">
-<label>Cadence <span class="bpmControl"><button id="minus" aria-label="Decrease BPM">−</button><input id="bpm" type="number" min="100" max="120" step="1" value="110" aria-label="Compressions per minute"><button id="plus" aria-label="Increase BPM">+</button><span>BPM</span></span></label>
-<label>Mode<select id="mode"><option value="cycles">30:2 · Manual resume</option><option value="continuous">Continuous cadence</option></select></label>
-<label>Color<select id="theme"><option value="teal">Teal</option><option value="blue">Slate blue</option><option value="sage">Sage</option><option value="lavender">Lavender</option><option value="amber">Warm amber</option></select></label>
-<button id="sound" aria-pressed="false">Sound <span>Off</span></button><button id="visual" aria-pressed="true">Visual pulse <span>On</span></button>
-<label>Audio gain <span class="gainControl"><input id="volume" type="range" min="0.05" max="0.7" step="0.01" value="0.25"><output id="gainValue">25%</output></span></label>
-</div>
-<div class="tools"><button id="testSound">Test sound · stopped only</button><button id="update" hidden>Apply downloaded update</button><button id="refreshOffline">Check offline files</button></div>
-<p class="explanation">Counts scheduled metronome cues. Caller compressions and breaths are not detected. In 30:2 mode, click Resume compressions when the caller reports returning to compressions. The round advances on that click.</p>
-<details><summary>Safety, installation & limitations</summary><p>Unvalidated prototype. Follow your agency’s approved dispatch protocol. This does not measure compression depth, recoil, performed compressions, or delivered breaths. Mode selection requires clinical approval.</p><p>Stops after a detected timing interruption, when hidden, or on an audio-clock interruption. A frozen browser cannot immediately execute Stop or display a fault. Audio is scheduled at most 180 ms ahead; actual device buffering adds latency. No fallback depends on this page remaining responsive.</p><p>Serve this folder over HTTPS or localhost. Wait for Offline files verified, then test closing and reopening the installed app with the network disconnected. Browser storage can be cleared or evicted. Installation does not guarantee offline availability.</p><p>Fresh launches are stopped, muted, 110 BPM, visual pulse on, and 30:2 mode. Only color and audio gain are saved. A breath phase never automatically restarts compressions. Keyboard controls only apply to focused controls; there are no global shortcuts.</p><p>Two windows cannot start together when Web Locks is supported on the same browser profile and origin. Other profiles, browsers, origins, and devices remain independent. Use a single approved instance.</p></details>
-<footer>Prototype v2.0.1 · No patient data collection · No external dependencies</footer>
-</main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10191f">
+  <meta name="description" content="CPR Counter: an offline dispatcher cadence reference prototype.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>CPR Counter</title>
+  <script src="core.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>CPR Counter</h1>
+      <span class="sub">Dispatcher reference · prototype</span>
+    </div>
+    <div class="headerActions">
+      <button id="fullscreen" type="button">Full screen</button>
+    </div>
+  </header>
+
+  <section id="panel" aria-label="Metronome visual cue">
+    <div id="pulse" aria-hidden="true"></div>
+    <div id="round">Round 1</div>
+    <div class="count">
+      <span id="count">—</span><span id="denominator"> / 30</span>
+    </div>
+    <div id="phase">Ready</div>
+    <div id="rateLabel">110 compressions / min</div>
+    <div id="breathTime" hidden></div>
+  </section>
+
+  <div class="transport">
+    <button id="action" class="primary" type="button">Start · Round 1</button>
+    <button id="stop" type="button" disabled>Stop</button>
+  </div>
+
+  <p id="message" role="status" aria-live="polite" aria-atomic="true">Ready. Keep this window visible on the secondary monitor.</p>
+
+  <div class="settings">
+    <label>Cadence
+      <span class="bpmControl">
+        <button id="minus" type="button" aria-label="Decrease BPM">−</button>
+        <input id="bpm" type="number" min="100" max="120" step="1" value="110" aria-label="Compressions per minute">
+        <button id="plus" type="button" aria-label="Increase BPM">+</button>
+        <span>BPM</span>
+      </span>
+    </label>
+    <label>Mode
+      <select id="mode">
+        <option value="cycles">30:2 · Manual resume</option>
+        <option value="continuous">Continuous cadence</option>
+      </select>
+    </label>
+    <label>Color
+      <select id="theme">
+        <option value="teal">Teal</option>
+        <option value="blue">Slate blue</option>
+        <option value="sage">Sage</option>
+        <option value="lavender">Lavender</option>
+        <option value="amber">Warm amber</option>
+      </select>
+    </label>
+    <button id="sound" type="button" aria-pressed="false">Sound <span>Off</span></button>
+    <button id="visual" type="button" aria-pressed="true">Visual pulse <span>On</span></button>
+    <label>Audio gain
+      <span class="gainControl">
+        <input id="volume" type="range" min="0.05" max="0.7" step="0.01" value="0.25" aria-label="Audio gain">
+        <output id="gainValue" for="volume">25%</output>
+      </span>
+    </label>
+  </div>
+
+  <details id="appDetails">
+    <summary>App details</summary>
+    <div class="app-diagnostics">
+      <h2>Offline &amp; session status</h2>
+      <div class="badges" role="status" aria-live="polite" aria-atomic="true">
+        <span id="offline">Checking offline files…</span>
+        <span id="network"></span>
+        <span id="lockStatus"></span>
+      </div>
+      <div class="tools">
+        <button id="testSound" type="button">Test sound · stopped only</button>
+        <button id="refreshOffline" type="button">Check offline files</button>
+        <button id="update" type="button" hidden>Apply downloaded update</button>
+        <button id="install" type="button" hidden>Install app</button>
+      </div>
+      <p class="detail-note">Check offline files updates the status above. It checks cached application files; it does not repair the cache or test an offline relaunch. Test sound requests a tone; confirm it is audible on the intended output device.</p>
+    </div>
+
+    <section class="detail-section" aria-labelledby="countingHelp">
+      <h2 id="countingHelp">Counting &amp; controls</h2>
+      <p>Counts scheduled metronome cues. Caller compressions and breaths are not detected. In 30:2 mode, click Resume compressions when the caller reports returning to compressions. The round advances on that click. Stop preserves the last display; a new Start resets the session.</p>
+      <p>Fresh launches are stopped, muted, 110 BPM, visual pulse on, and 30:2 mode. Only color and audio gain are saved. A breath phase never automatically restarts compressions. There are no global keyboard shortcuts; focused controls accept normal keyboard activation.</p>
+    </section>
+
+    <section class="detail-section" aria-labelledby="safetyHelp">
+      <h2 id="safetyHelp">Safety &amp; limitations</h2>
+      <p>Unvalidated prototype. Follow your agency’s approved dispatch protocol. This does not measure compression depth, recoil, performed compressions, or delivered breaths. Mode selection requires clinical approval.</p>
+      <p>Stops after a detected timing interruption, when hidden, or on an audio-clock interruption. A frozen browser cannot immediately execute Stop or display a fault. Audio is scheduled at most 180 ms ahead; actual device buffering adds latency. The agency’s fallback procedure must remain usable without this page.</p>
+      <p>Two windows cannot start together when Web Locks is supported on the same browser profile and origin. Other profiles, browsers, origins, and devices remain independent. Use a single approved instance.</p>
+    </section>
+
+    <section class="detail-section" aria-labelledby="installHelp">
+      <h2 id="installHelp">Installation &amp; offline use</h2>
+      <p>Serve this folder over HTTPS or localhost. Wait for Offline files verified, then test closing and reopening the installed app with the network disconnected. Browser storage can be cleared or evicted. Installation does not guarantee offline availability.</p>
+      <p>Stop the session before installing or applying an update. Clinical and workstation validation is required before operational use.</p>
+    </section>
+  </details>
+
+  <footer>CPR Counter · Unvalidated prototype</footer>
+</main>
+</body>
+</html>
