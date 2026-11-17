@@ -191,8 +191,12 @@ async function setupWorker(){
   function waiting(){el.update.hidden=!registration.waiting;}
   waiting();registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed')waiting();});});
   navigator.serviceWorker.addEventListener('controllerchange',()=>{checkOffline().catch(()=>{el.offline.textContent='Offline check failed';});});
-  await navigator.serviceWorker.ready;await checkOffline();
- }catch{el.offline.textContent='Offline registration or check failed';}
+  let readyTimer=null;
+  try{
+   await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>{readyTimer=setTimeout(()=>reject(Error('Service worker activation timed out.')),10000);})]);
+   await checkOffline();
+  }finally{if(readyTimer)clearTimeout(readyTimer);}
+ }catch{el.offline.textContent='Offline registration or activation failed';}
 }
 el.update.addEventListener('click',()=>{
  if(active()){message('Stop before updating.');return;}

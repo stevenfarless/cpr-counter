@@ -31,7 +31,7 @@ Owner, agency protocol, approved users, workstation OS/build, browser/build, dis
 - Corrupt saved preferences, unavailable Web Audio, denied screen wake lock, render/resource failures.
 
 ## PWA lifecycle
-- HTTPS/localhost install; first-load caching; failed/partial cache download; app reports unverified on timeout.
+- HTTPS/localhost install; first-load caching; failed/partial cache download; service-worker activation timeout; app reports unverified on timeout.
 - Close all windows; disconnect network; reopen installed app; exercise all features including sound.
 - Repeat after reboot, browser update and storage clearing; ensure offline state is accurately represented.
 - Update while stopped and during each session phase; no active-session automatic reload; check multiple clients.
