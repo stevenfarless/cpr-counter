@@ -2,7 +2,7 @@
   "app_version": "2.0.1",
   "ci_workflow": "Validate",
   "ci_status": "passed",
-  "ci_run_url": "https://github.com/stevenfarless/cprcounter/actions/runs/44031208475",
+  "ci_run_url": "https://github.com/stevenfarless/cprcounter/actions/runs/44031782620",
   "node_version": "22.23.4",
   "checks": [
     {
@@ -41,6 +41,11 @@
     {
       "name": "CPR Counter HTML and manifest branding",
       "pass": true
+    },
+    {
+      "name": "pulse-theme normal-text contrast",
+      "pass": true,
+      "detail": "White status text exceeds 4.5:1 against all five pulse backgrounds; minimum calculated contrast is 4.78:1."
     }
   ],
   "browser_tests": "NOT RUN",
