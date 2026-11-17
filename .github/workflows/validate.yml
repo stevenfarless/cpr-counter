@@ -41,6 +41,18 @@ jobs:
             const path = asset.split(/[?#]/, 1)[0];
             if (path && !fs.existsSync(path)) throw new Error('Missing local asset: ' + path);
           }
+          const css = fs.readFileSync('styles.css', 'utf8');
+          if (!/#rateLabel,#breathTime\\{[^}]*color:#fff/.test(css)) throw new Error('Panel status text must use white for pulse-theme contrast');
+          const pulseColors = ['#437b82', '#4a6e91', '#576f59', '#70658d', '#886b43'];
+          const luminance = hex => {
+            const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+              .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+            return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+          };
+          for (const color of pulseColors) {
+            const contrast = (luminance('#ffffff') + 0.05) / (luminance(color) + 0.05);
+            if (contrast < 4.5) throw new Error('Pulse theme fails normal-text contrast: ' + color);
+          }
           const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
           for (const icon of manifest.icons || []) {
             if (!fs.existsSync(icon.src)) throw new Error('Missing manifest icon: ' + icon.src);
