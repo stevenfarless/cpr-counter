@@ -42,7 +42,7 @@ h1 { margin: 0 0 5px; font-size: 1rem; letter-spacing: .13em; text-transform: up
 #count { font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
 #denominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
 #phase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
-#rateLabel, #breathTime { margin-top: 10px; font-size: .9rem; color: #ccd9df; font-variant-numeric: tabular-nums; }
+#rateLabel,#breathTime{margin-top:10px;font-size:.9rem;color:#fff;font-variant-numeric:tabular-nums;}
 .transport { display: grid; grid-template-columns: 3fr 1fr; gap: 12px; }
 button, input, select { font: inherit; }
 button, select, input[type="number"] {
