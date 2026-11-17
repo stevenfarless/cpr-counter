@@ -57,7 +57,7 @@ jobs:
           for (const icon of manifest.icons || []) {
             if (!fs.existsSync(icon.src)) throw new Error('Missing manifest icon: ' + icon.src);
           }
-          if (!html.includes('<title>CPR Counter</title>')) throw new Error('HTML title is not CPR Counter');
+          if (!html.includes('<title>CPR Counter</title>') || !html.includes('<h1>CPR Counter</h1>')) throw new Error('HTML title or heading is not CPR Counter');
           if (manifest.short_name !== 'CPR Counter') throw new Error('Manifest short_name is not CPR Counter');
           console.log('HTML IDs, local assets, manifest JSON, and app branding passed.');
           NODE
