@@ -74,7 +74,9 @@ Open `http://localhost:8000` in your browser. Production-style PWA evaluation sh
 npm test
 ```
 
-This runs the timing-model checks (`node core-tests.cjs`) and the browser behavior tests (`browser-tests/counter.spec.js`, via Playwright). The browser tests assert behavior in a real Chromium instance: cue progression, the cue 30 boundary, the breath phase with no automatic resume, Stop preservation and new-session reset, counter-only operation, computed panel-text colors and contrast in every theme, layout stability across counts, touch targets, and short-landscape/narrow-portrait layouts. They do not verify actual speaker or display delivery, or clinical readiness.
+This runs the timing-model checks (`node core-tests.cjs`) and the browser behavior tests (`browser-tests/counter.spec.js`, via Playwright). The browser tests assert behavior in a real Chromium instance: cue progression, the cue 30 boundary, the breath phase with no automatic resume, Stop preservation and new-session reset, counter-only operation, computed panel-text colors and contrast in every theme, layout stability across counts, touch targets, short-landscape/narrow-portrait layouts, and the stall tolerance of the timing check (a single 300 ms stall, including one straddling a cue, does not fault; repeated stalls or a freeze over a second do). They do not verify actual speaker or display delivery, or clinical readiness.
+
+A standalone load-measurement script (`node browser-tests/load-measurement.cjs [scenarios]`) measures the false-fault rate under workstation load: idle, CPU-throttled, and main-thread stalls of 120–600 ms, plus a throttled endurance run. Results are recorded in VALIDATION.md.
 
 A development-only simulation harness lives at `sim.html` for local runs. It is not deployed to the public site, is not linked from the app, is not cached by the service worker, starts no session, plays no audio, and stores nothing. It drives only the pure timing model with synthetic elapsed times (for example, starting at cue 28 or showing the breath phase) so transitions can be inspected repeatedly without starting a session. See the page itself for how to reset a scenario.
 

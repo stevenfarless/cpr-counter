@@ -161,6 +161,52 @@ test('counter and primary controls do not move across counts 9, 10, 29, 30 and b
   expect(countAfter.x).toBeCloseTo(countBoxes[0].x, 0);
 });
 
+test('a single 300 ms main-thread stall does not fault the session', async ({ page }) => {
+  await page.goto('/');
+  await startAtBpm(page, 120);
+  // Block the main thread right after a count change (just after a cue),
+  // so the next cue is ~200 ms away at 120 BPM.
+  await page.waitForFunction(() => document.getElementById('count').textContent !== '—', null, { timeout: 10000 });
+  await page.evaluate(() => { const end = performance.now() + 300; while (performance.now() < end) {} });
+  await page.waitForTimeout(2000);
+  await expect(page.locator('#phase')).toHaveText('Compressions');
+  await waitForCount(page, 6);
+});
+
+test('a 300 ms stall straddling a cue does not fault the session', async ({ page }) => {
+  await page.goto('/');
+  await startAtBpm(page, 120);
+  await page.waitForFunction(() => document.getElementById('count').textContent !== '—', null, { timeout: 10000 });
+  // The next cue (500 ms after the previous at 120 BPM) falls inside
+  // this stall; it was already scheduled, so it still plays on time.
+  await page.waitForTimeout(250);
+  await page.evaluate(() => { const end = performance.now() + 300; while (performance.now() < end) {} });
+  await page.waitForTimeout(2000);
+  await expect(page.locator('#phase')).toHaveText('Compressions');
+  await waitForCount(page, 6);
+});
+
+test('two long stalls close together fault the session', async ({ page }) => {
+  await page.goto('/');
+  await startAtBpm(page, 120);
+  await page.waitForFunction(() => document.getElementById('count').textContent !== '—', null, { timeout: 10000 });
+  await page.evaluate(() => { const end = performance.now() + 300; while (performance.now() < end) {} });
+  await page.waitForTimeout(50);
+  await page.evaluate(() => { const end = performance.now() + 300; while (performance.now() < end) {} });
+  await expect(page.locator('#phase')).toHaveText('Interrupted — stopped', { timeout: 10000 });
+  await expect(page.locator('#message')).toContainText('cue timing was interrupted');
+  await expect(page.locator('#action')).toHaveText('Restart session');
+});
+
+test('a freeze over a second faults the session', async ({ page }) => {
+  await page.goto('/');
+  await startAtBpm(page, 120);
+  await page.waitForFunction(() => document.getElementById('count').textContent !== '—', null, { timeout: 10000 });
+  await page.evaluate(() => { const end = performance.now() + 1100; while (performance.now() < end) {} });
+  await expect(page.locator('#phase')).toHaveText('Interrupted — stopped', { timeout: 10000 });
+  await expect(page.locator('#action')).toHaveText('Restart session');
+});
+
 test('duplicate session in a second window is rejected in plain language with a Restart label', async ({ page, context }) => {
   await page.goto('/');
   await startAtBpm(page, 120);
