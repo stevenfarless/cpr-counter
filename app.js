@@ -2,16 +2,13 @@
    Counter-only operation is allowed. Compatible with the optional update-manager.js.
    Unvalidated prototype: requires browser and workstation validation. */
 'use strict';
-const VERSION='2.2.0', Core=globalThis.CadenceCore;
+const VERSION='2.3.0', Core=globalThis.CadenceCore;
 const ids=['offline','network','lockStatus','panel','pulse','round','count','denominator','phase','rateLabel','breathTime','action','stop','message','configSummary','settingsDetails','bpm','minus','plus','mode','theme','sound','visual','volume','gainValue','showBreathTime','testSound','install','fullscreen','update','refreshOffline'];
 const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
 let state='idle',round=1,count=0,mode='cycles',sound=false,visual=true;
 let ctx=null,master=null,tone=null,epoch=0,period=60/110,nextBeat=0,raf=0,lastFrame=0,lastClock=0,lastPulse=null,lastBreathSecond=-1;
-let generation=0,releaseLock=null,wake=null,installPrompt=null,registration=null,testNode=null;
+let generation=0,releaseLock=null,wake=null,installPrompt=null,testNode=null;
 const sources=new Set();
-const externalUpdater=Array.from(document.scripts).some(script=>{
- try{return new URL(script.src,location.href).pathname.endsWith('/update-manager.js');}catch{return false;}
-});
 function message(text){el.message.textContent=text;}
 function active(){return ['starting','compressions','breaths'].includes(state);}
 function save(){
@@ -270,45 +267,7 @@ el.install.addEventListener('click',async()=>{
 });
 window.addEventListener('appinstalled',()=>{el.install.hidden=true;});
 
-// Legacy worker controls run only when update-manager.js is not included.
-async function checkOffline(){
- if(!navigator.serviceWorker?.controller){el.offline.textContent='Offline readiness not verified';return;}
- el.offline.textContent='Checking cached files…';
- const channel=new MessageChannel();
- const result=await new Promise(resolve=>{
-  const timeout=setTimeout(()=>resolve(null),4000);
-  channel.port1.onmessage=event=>{clearTimeout(timeout);resolve(event.data);};
-  navigator.serviceWorker.controller.postMessage({type:'VERIFY'},[channel.port2]);
- });
- channel.port1.close();
- el.offline.textContent=result?.ready&&result.version===VERSION?'Offline files verified · v'+VERSION:'Offline files not verified';
-}
-async function setupWorker(){
- el.refreshOffline.addEventListener('click',()=>checkOffline().catch(()=>{el.offline.textContent='Offline check failed';}));
- if(!('serviceWorker'in navigator)||!window.isSecureContext){
-  el.offline.textContent='Offline unavailable · use HTTPS or localhost';return;
- }
- try{
-  registration=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
-  function waiting(){el.update.hidden=!registration.waiting;}
-  waiting();registration.addEventListener('updatefound',()=>{
-   const worker=registration.installing;
-   worker?.addEventListener('statechange',()=>{if(worker.state==='installed')waiting();});
-  });
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-   checkOffline().catch(()=>{el.offline.textContent='Offline check failed';});
-  });
-  await navigator.serviceWorker.ready;await checkOffline();
- }catch{el.offline.textContent='Offline registration or check failed';}
- el.update.addEventListener('click',()=>{
-  if(active()){message('Stop before updating.');return;}
-  if(!registration?.waiting)return;
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!active())location.reload();},{once:true});
-  registration.waiting.postMessage({type:'ACTIVATE'});
- });
-}
 validate();render();
 // In short landscape the panel and primary controls come first; keep
 // Settings collapsed there so Start/Stop stay reachable without scrolling.
 if(window.matchMedia('(max-height: 520px) and (orientation: landscape)').matches)el.settingsDetails.open=false;
-if(!externalUpdater)setupWorker();

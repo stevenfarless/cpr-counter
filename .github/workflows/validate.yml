@@ -26,7 +26,6 @@ jobs:
           node --check core.js
           node --check sim.js
           node --check sw.js
-          node --check release-sw.js
           node --check update-manager.js
           node --check core-tests.cjs
           node --check playwright.config.js
@@ -53,14 +52,13 @@ jobs:
           }
           if (!html.includes('<title>CPR Counter</title>') || !html.includes('<h1>CPR Counter</h1>')) throw new Error('HTML title or heading is not CPR Counter');
           if (manifest.short_name !== 'CPR Counter') throw new Error('Manifest short_name is not CPR Counter');
-          // One release version across the app, workers, updater, and kit.
+          // One release version across the app, worker, updater, and package.
           // The offline check compares the worker version to the app version,
           // so a mismatch here means offline verification can never pass.
           const versions = new Map();
           for (const [file, pattern] of [
             ['app.js', /VERSION\s*=\s*'([^']+)'/],
             ['sw.js', /VERSION\s*=\s*'([^']+)'/],
-            ['release-sw.js', /VERSION\s*=\s*'([^']+)'/],
             ['update-manager.js', /RELEASE\s*=\s*'([^']+)'/],
             ['package.json', /"version"\s*:\s*"([^"]+)"/],
           ]) {
@@ -72,8 +70,6 @@ jobs:
           if (distinct.length !== 1) {
             throw new Error('Version mismatch: ' + [...versions.entries()].map(([f, v]) => f + '=' + v).join(', '));
           }
-          const kit = fs.readFileSync('apply-update.py', 'utf8');
-          if (!kit.includes(distinct[0])) throw new Error('apply-update.py does not reference release ' + distinct[0]);
           // The simulation harness must stay isolated from the normal route.
           const sw = fs.readFileSync('sw.js', 'utf8');
           if (sw.includes('sim.html')) throw new Error('sim.html must not be cached by the service worker');

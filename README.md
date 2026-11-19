@@ -76,7 +76,7 @@ npm test
 
 This runs the timing-model checks (`node core-tests.cjs`) and the browser behavior tests (`browser-tests/counter.spec.js`, via Playwright). The browser tests assert behavior in a real Chromium instance: cue progression, the cue 30 boundary, the breath phase with no automatic resume, Stop preservation and new-session reset, counter-only operation, computed panel-text colors and contrast in every theme, layout stability across counts, touch targets, and short-landscape/narrow-portrait layouts. They do not verify actual speaker or display delivery, or clinical readiness.
 
-A development-only simulation harness lives at `sim.html`. It drives only the pure timing model with synthetic elapsed times (for example, starting at cue 28 or showing the breath phase) so transitions can be inspected repeatedly without starting a session. It is not linked from the app, is not cached by the service worker, starts no session, plays no audio, and stores nothing. See the page itself for how to reset a scenario.
+A development-only simulation harness lives at `sim.html` for local runs. It is not deployed to the public site, is not linked from the app, is not cached by the service worker, starts no session, plays no audio, and stores nothing. It drives only the pure timing model with synthetic elapsed times (for example, starting at cue 28 or showing the breath phase) so transitions can be inspected repeatedly without starting a session. See the page itself for how to reset a scenario.
 
 This setup is for development and nonclinical evaluation only.
 
@@ -84,9 +84,19 @@ This setup is for development and nonclinical evaluation only.
 
 Offline operation depends on successful caching and continued availability of browser storage. An installed app may have an older version. Network availability, browser scheduling, sleeping devices, storage removal, and deployment failures can delay or prevent updates.
 
-The update interface is intended to check for releases, identify a downloaded update, and apply it while stopped. Do not assume every open device is running the newest release. Record and verify the version used during testing.
+The update interface is intended to check for releases, identify a downloaded update, and apply it while stopped. A Check for updates button and an update banner live in the App details section; a downloaded update is verified against the release version before it can be applied, and activation requires every open app window to confirm it is idle. Do not assume every open device is running the newest release. Record and verify the version used during testing.
+
+Only the app files deploy to GitHub Pages (`index.html`, `styles.css`, `core.js`, `app.js`, `sw.js`, `update-manager.js`, `manifest.webmanifest`, icons). Development files are not served from the public site.
 
 Changing files in the repository does not by itself prove that a deployed or installed copy has received them. Test the complete deployment, update, and offline-relaunch process.
+
+## Release procedure
+
+1. Bump the version in `package.json`, `app.js`, `sw.js`, and `update-manager.js` together; CI fails if they disagree.
+2. Run the full test suite (`npm test`) and the browser tests.
+3. Merge, then confirm the Pages deploy succeeds and the live site serves the new version.
+4. On the live site, verify the update flow: install, offline relaunch, a downloaded update appearing in the banner, activation only while stopped, and no active-session reload.
+5. Cut a tagged GitHub release with notes on what landed.
 
 ## Known limitations
 
