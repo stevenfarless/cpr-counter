@@ -273,6 +273,34 @@ test('pending-update banner reserves its space and never moves the controls', as
   expect(await rect('.transport')).toEqual(transportHidden);
 });
 
+test('service worker keeps only the current and previous version caches', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
+  // Seed the caches past releases left behind.
+  await page.evaluate(async () => {
+    for (const v of ['2.0.0', '2.1.0', '2.2.0']) {
+      const c = await caches.open('cpr-counter-' + v);
+      await c.put('/seed-' + v, new Response('seed'));
+    }
+  });
+  // Force the worker to activate again: unregister, then reload.
+  await page.evaluate(async () => {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
+  const names = await page.evaluate(() => caches.keys());
+  expect(names).toContain('cpr-counter-2.3.0');
+  expect(names).toContain('cpr-counter-2.2.0'); // previous release kept
+  expect(names).not.toContain('cpr-counter-2.1.0');
+  expect(names).not.toContain('cpr-counter-2.0.0');
+  // The pruned caches are gone, the kept ones still serve, and the app
+  // still works offline after the cleanup.
+  await page.evaluate(() => caches.open('cpr-counter-2.2.0').then((c) => c.match('/seed-2.2.0').then((r) => r.text())));
+  await expect(page.locator('#action')).toHaveText('Start round 1');
+});
+
 test('simulation harness is isolated: scenarios work, normal app is untouched', async ({ page }) => {
   await page.goto('/sim.html');
   await expect(page.locator('h1')).toContainText('Simulation');

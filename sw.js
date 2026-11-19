@@ -13,7 +13,31 @@ self.addEventListener('install',event=>event.waitUntil((async()=>{
  await cache.addAll(ASSETS.map(p=>new Request(absolute(p),{cache:'reload'})));
  // No skipWaiting: an existing release remains in control until approved.
 })()));
-self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+/* Bounded retention (#16): keep this release and the previous one, and
+   delete older version caches. Activation only happens after every open
+   window confirmed it is idle, and claim() puts those windows under this
+   worker, so nothing still needs the older caches — their fetches are
+   served from the current cache or the network. A pruning failure must
+   not break activation, so it is swallowed; the caches stay until the
+   next activation retries. */
+function parseVersion(name){
+ const m=/^cpr-counter-(\d+)\.(\d+)\.(\d+)$/.exec(name);
+ return m?m.slice(1).map(Number):null;
+}
+async function pruneOldCaches(){
+ const versioned=(await caches.keys())
+  .map(n=>[n,parseVersion(n)]).filter(([,v])=>v);
+ versioned.sort((a,b)=>{
+  for(let i=0;i<3;i++)if(a[1][i]!==b[1][i])return b[1][i]-a[1][i];
+  return 0;
+ });
+ const keep=new Set(versioned.slice(0,2).map(([n])=>n));
+ await Promise.all(versioned.filter(([n])=>!keep.has(n)).map(([n])=>caches.delete(n)));
+}
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+ await self.clients.claim();
+ try{await pruneOldCaches();}catch{}
+})()));
 function ask(client){return new Promise(resolve=>{
  const channel=new MessageChannel();
  const timer=setTimeout(()=>{channel.port1.close();resolve(false);},2000);
@@ -45,4 +69,5 @@ self.addEventListener('fetch',event=>{
   }catch{return fetch(request);}
  })());
 });
-// Retain previous caches while old clients may still use them.
+// Old version caches are pruned on activation (see pruneOldCaches):
+// only the current and previous releases are retained.
