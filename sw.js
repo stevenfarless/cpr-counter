@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='2.0.1', CACHE='cpr-counter-'+VERSION;
+const VERSION='2.2.0', CACHE='cpr-counter-'+VERSION;
 const ASSETS=['./','./index.html','./styles.css','./core.js','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 const url=p=>new URL(p,self.registration.scope).href;
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS.map(p=>new Request(url(p),{cache:'reload'})));})());});

@@ -33,7 +33,7 @@
     </div>
     <div id="phase">Ready</div>
     <div id="rateLabel">110 compressions / min</div>
-    <div id="breathTime" hidden></div>
+    <div id="breathTime" class="vis-hidden" aria-hidden="true">Since last cue: 0 s</div>
   </section>
 
   <div class="transport">
@@ -43,6 +43,10 @@
 
   <p id="message" role="status" aria-live="polite" aria-atomic="true">Ready. Keep this window visible on the secondary monitor.</p>
 
+  <p id="configSummary" role="status" aria-live="off">110 BPM · 30:2 · Sound off · Visual pulse on</p>
+
+  <details id="settingsDetails" open>
+    <summary>Settings</summary>
   <div class="settings">
     <label>Cadence
       <span class="bpmControl">
@@ -75,7 +79,14 @@
         <output id="gainValue" for="volume">25%</output>
       </span>
     </label>
+    <label class="checkLabel">Breath timer
+      <span class="checkControl">
+        <input id="showBreathTime" type="checkbox" checked>
+        <span>Show time since last cue</span>
+      </span>
+    </label>
   </div>
+  </details>
 
   <details id="appDetails">
     <summary>App details</summary>
@@ -97,7 +108,7 @@
 
     <section class="detail-section" aria-labelledby="countingHelp">
       <h2 id="countingHelp">Counting &amp; controls</h2>
-      <p>Counts scheduled metronome cues. Caller compressions and breaths are not detected. In 30:2 mode, click Resume compressions when the caller reports returning to compressions. The round advances on that click. Stop preserves the last display; a new Start resets the session.</p>
+      <p>Counts scheduled metronome cues. Caller compressions and breaths are not detected. In 30:2 mode, click Resume compressions when the caller reports returning to compressions. The round advances on that click. Stop preserves the last display; a new Start resets the session. The breath timer, when shown, counts whole seconds since the last scheduled compression cue; it can be hidden in Settings without changing timing or resume behavior, and it does not detect breaths.</p>
       <p>Fresh launches are stopped, muted, 110 BPM, visual pulse on, and 30:2 mode. Only color and audio gain are saved. A breath phase never automatically restarts compressions. There are no global keyboard shortcuts; focused controls accept normal keyboard activation.</p>
     </section>
 

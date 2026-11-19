@@ -19,15 +19,21 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
       - name: Check JavaScript syntax
         run: |
           node --check app.js
           node --check core.js
+          node --check sim.js
           node --check sw.js
+          node --check release-sw.js
+          node --check update-manager.js
           node --check core-tests.cjs
+          node --check playwright.config.js
+          node --check browser-tests/counter.spec.js
       - name: Run timing model tests
         run: node core-tests.cjs
-      - name: Validate local assets, manifest, and HTML identifiers
+      - name: Validate local assets, manifest, HTML identifiers, and version agreement
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -41,23 +47,44 @@ jobs:
             const path = asset.split(/[?#]/, 1)[0];
             if (path && !fs.existsSync(path)) throw new Error('Missing local asset: ' + path);
           }
-          const css = fs.readFileSync('styles.css', 'utf8');
-          if (!css.includes('#rateLabel,#breathTime{margin-top:10px;font-size:.9rem;color:#fff;')) throw new Error('Panel status text must use white for pulse-theme contrast');
-          const pulseColors = ['#437b82', '#4a6e91', '#576f59', '#70658d', '#886b43'];
-          const luminance = hex => {
-            const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
-              .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-            return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-          };
-          for (const color of pulseColors) {
-            const contrast = (luminance('#ffffff') + 0.05) / (luminance(color) + 0.05);
-            if (contrast < 4.5) throw new Error('Pulse theme fails normal-text contrast: ' + color);
-          }
           const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
           for (const icon of manifest.icons || []) {
             if (!fs.existsSync(icon.src)) throw new Error('Missing manifest icon: ' + icon.src);
           }
           if (!html.includes('<title>CPR Counter</title>') || !html.includes('<h1>CPR Counter</h1>')) throw new Error('HTML title or heading is not CPR Counter');
           if (manifest.short_name !== 'CPR Counter') throw new Error('Manifest short_name is not CPR Counter');
-          console.log('HTML IDs, local assets, manifest JSON, and app branding passed.');
+          // One release version across the app, workers, updater, and kit.
+          // The offline check compares the worker version to the app version,
+          // so a mismatch here means offline verification can never pass.
+          const versions = new Map();
+          for (const [file, pattern] of [
+            ['app.js', /VERSION\s*=\s*'([^']+)'/],
+            ['sw.js', /VERSION\s*=\s*'([^']+)'/],
+            ['release-sw.js', /VERSION\s*=\s*'([^']+)'/],
+            ['update-manager.js', /RELEASE\s*=\s*'([^']+)'/],
+            ['package.json', /"version"\s*:\s*"([^"]+)"/],
+          ]) {
+            const match = fs.readFileSync(file, 'utf8').match(pattern);
+            if (!match) throw new Error('Version constant not found in ' + file);
+            versions.set(file, match[1]);
+          }
+          const distinct = [...new Set(versions.values())];
+          if (distinct.length !== 1) {
+            throw new Error('Version mismatch: ' + [...versions.entries()].map(([f, v]) => f + '=' + v).join(', '));
+          }
+          const kit = fs.readFileSync('apply-update.py', 'utf8');
+          if (!kit.includes(distinct[0])) throw new Error('apply-update.py does not reference release ' + distinct[0]);
+          // The simulation harness must stay isolated from the normal route.
+          const sw = fs.readFileSync('sw.js', 'utf8');
+          if (sw.includes('sim.html')) throw new Error('sim.html must not be cached by the service worker');
+          if (html.includes('sim.html')) throw new Error('sim.html must not be linked from index.html');
+          console.log('HTML IDs, local assets, manifest JSON, app branding, version agreement (' + distinct[0] + '), and simulation isolation passed.');
           NODE
+      - name: Install browser test dependencies
+        run: |
+          npm ci
+          npx playwright install chromium
+      - name: Run browser behavior tests
+        # Computed styles, layout stability, counting, and viewport behavior
+        # are asserted in a real browser here, not by matching CSS text.
+        run: npx playwright test
