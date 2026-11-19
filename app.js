@@ -6,8 +6,9 @@ const VERSION='2.3.0', Core=globalThis.CadenceCore;
 const ids=['offline','network','lockStatus','panel','pulse','round','count','denominator','phase','rateLabel','breathTime','action','stop','message','configSummary','settingsDetails','bpm','minus','plus','mode','theme','sound','visual','volume','gainValue','showBreathTime','testSound','install','fullscreen','update','refreshOffline'];
 const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
 let state='idle',round=1,count=0,mode='cycles',sound=false,visual=true;
-let ctx=null,master=null,tone=null,epoch=0,period=60/110,nextBeat=0,raf=0,lastFrame=0,lastClock=0,lastPulse=null,lastBreathSecond=-1;
+let ctx=null,master=null,tone=null,epoch=0,period=60/110,nextBeat=0,raf=0,lastFrame=0,lastPulse=null,lastBreathSecond=-1;
 let generation=0,releaseLock=null,wake=null,installPrompt=null,testNode=null;
+let lastLongFrame=0; // rAF timestamp of the last long gap (0 = none yet)
 const sources=new Set();
 function message(text){el.message.textContent=text;}
 function active(){return ['starting','compressions','breaths'].includes(state);}
@@ -123,7 +124,7 @@ function validate(){
  return valid;
 }
 function beginRound(){
- cancelAudio();epoch=ctx.currentTime+.10;nextBeat=0;lastFrame=0;lastClock=ctx.currentTime;lastPulse=null;lastBreathSecond=-1;
+ cancelAudio();epoch=ctx.currentTime+.10;nextBeat=0;lastFrame=0;lastPulse=null;lastBreathSecond=-1;lastLongFrame=0;
  // Settings collapse when a session (re)starts; they stay inspectable.
  el.settingsDetails.open=false;
  count=0;state='compressions';render();raf=requestAnimationFrame(tick);
@@ -152,17 +153,36 @@ function tick(now){
   stop('Session stopped — the window was hidden or the audio clock was interrupted. Press Restart session to begin again.',true);return;
  }
  const clock=ctx.currentTime;
- if(lastFrame&&(now-lastFrame>250||Math.abs((clock-lastClock)*1000-(now-lastFrame))>150)){
-  stop('Session stopped — cue timing was interrupted. Press Restart session to begin again.',true);return;
+ if(lastFrame){
+  // One long frame is a workstation stall, not a failure: cues are
+  // scheduled ahead on the audio clock and still play. Fault only when
+  // the interruption repeats — a second long frame within 5 s — or on a
+  // freeze over a second. A cue that actually goes undelivered still
+  // faults immediately via the missed-cue check below.
+  // There is deliberately no audio/frame clock-drift check here:
+  // measured drift samples up to ~282 ms occur on normal 17 ms frames
+  // (the audio clock advances in bursts), so instantaneous drift is
+  // noise, not a timing failure. Audio-clock interruption is already
+  // caught by the statechange listener above.
+  const gap=now-lastFrame;
+  if(gap>250){
+   if(lastLongFrame&&now-lastLongFrame<5000){stop('Session stopped — cue timing was interrupted. Press Restart session to begin again.',true);return;}
+   lastLongFrame=now;
+  }
+  if(gap>1000){stop('Session stopped — cue timing was interrupted. Press Restart session to begin again.',true);return;}
  }
- lastFrame=now;lastClock=clock;
+ lastFrame=now;
  if(state==='compressions'){
   const snapshot=Core.snapshot(clock-epoch,period,mode);
   const limit=mode==='cycles'?30:Infinity;
   if(nextBeat<limit&&epoch+nextBeat*period<clock-.025){
    stop('Session stopped — a scheduled cue was missed. Press Restart session to begin again.',true);return;
   }
-  while(nextBeat<limit&&epoch+nextBeat*period<clock+.18){
+  // Schedule 400 ms ahead, so a stall up to ~375 ms cannot leave a cue
+  // unqueued: the cue was already scheduled and plays on time. Longer
+  // stalls still fault via the missed-cue check above. Stop cancels
+  // queued tones, so the longer window does not delay stopping.
+  while(nextBeat<limit&&epoch+nextBeat*period<clock+.40){
    // Keep the timing path unchanged in muted/counter-only operation.
    queueBeat(epoch+nextBeat*period);nextBeat++;
   }
