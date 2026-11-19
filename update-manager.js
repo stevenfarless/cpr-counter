@@ -6,9 +6,6 @@
  const details=document.getElementById('appDetails')||document.querySelector('main details');
  const main=document.querySelector('main');
  if(!details||!main)return;
- const style=document.createElement('style');
- style.textContent=`#releaseBanner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #7baeb0;background:#1b3338;border-radius:12px;padding:10px 14px;margin:16px 0;min-height:58px;font-size:.9rem}#releaseBanner button{min-height:40px;padding:8px 14px}.release-controls{margin:14px 0}.release-status{font-size:.82rem;line-height:1.5;color:#b4c6d0;min-height:1.5em}@media (max-height: 520px) and (orientation: landscape){#releaseBanner{min-height:40px;margin:8px 0;padding:6px 10px;font-size:.82rem}#releaseBanner button{min-height:32px;padding:4px 10px}}`;
- document.head.append(style);
  const banner=document.createElement('div');banner.id='releaseBanner';banner.hidden=true;
  const label=document.createElement('span');label.setAttribute('role','status');label.setAttribute('aria-live','polite');
  // Keep the existing element and ID used by render().
