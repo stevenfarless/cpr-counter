@@ -43,6 +43,7 @@ h1 { margin: 0 0 5px; font-size: 1rem; letter-spacing: .13em; text-transform: up
 /* Long continuous counts shrink instead of overflowing the panel. */
 #count[data-digits="3"] { font-size: clamp(64px, 11vw, 110px); }
 #count[data-digits="4"] { font-size: clamp(48px, 9vw, 84px); }
+#count[data-digits="5"], #count[data-digits="6"] { font-size: clamp(36px, 7vw, 64px); }
 #denominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
 #phase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
 #rateLabel,#breathTime{margin-top:10px;font-size:.9rem;color:#fff;font-variant-numeric:tabular-nums;}
@@ -104,6 +105,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .detail-note { margin: 12px 0 0; max-width: 78ch; }
 .detail-section { border-top: 1px solid #293c47; padding: 16px 0 0; margin: 0 0 16px; }
 .detail-section p { margin: 8px 0; max-width: 85ch; }
+/* Release banner (created by update-manager.js). Visibility, not display,
+   reserves its space so a pending update never moves the controls. */
+#releaseBanner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border: 1px solid #7baeb0; background: #1b3338; border-radius: 12px; padding: 10px 14px; margin: 16px 0; min-height: 58px; font-size: .9rem; }
+#releaseBanner button { min-height: 40px; padding: 8px 14px; }
+.release-controls { margin: 14px 0; }
+.release-status { font-size: .82rem; line-height: 1.5; color: #b4c6d0; min-height: 1.5em; }
+
 footer { margin-top: 12px; padding-bottom: 8px; }
 body[data-theme="blue"] { --cue: #4a6e91; --edge: #8eabc8; --button: #b2cbe0; }
 body[data-theme="sage"] { --cue: #576f59; --edge: #a4b99c; --button: #c2d3b7; }
@@ -134,6 +142,7 @@ body[data-theme="amber"] { --cue: #886b43; --edge: #c9ab7b; --button: #e0c598; }
   #count { font-size: clamp(48px, 12vh, 72px); }
   #count[data-digits="3"] { font-size: clamp(44px, 10vh, 64px); }
   #count[data-digits="4"] { font-size: clamp(36px, 9vh, 52px); }
+  #count[data-digits="5"], #count[data-digits="6"] { font-size: clamp(28px, 7vh, 40px); }
   #denominator { font-size: 20px; }
   #phase { font-size: 16px; }
   #rateLabel, #breathTime { margin-top: 4px; }
@@ -149,3 +158,22 @@ body[data-theme="amber"] { --cue: #886b43; --edge: #c9ab7b; --button: #e0c598; }
     display: none;
   }
 }
+
+/* Short landscape banner: compact, matching the compact panel. */
+@media (max-height: 520px) and (orientation: landscape) {
+  #releaseBanner { min-height: 40px; margin: 8px 0; padding: 6px 10px; font-size: .82rem; }
+  #releaseBanner button { min-height: 32px; padding: 4px 10px; }
+}
+
+/* Simulation harness only (sim.html, development-only, not deployed). */
+.sim-note { border: 2px dashed #d6ad78; border-radius: 12px; padding: 12px 14px; margin: 16px 0; font-size: .9rem; line-height: 1.6; color: #dfc69e; }
+.sim-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+.sim-controls button { min-height: 48px; }
+.sim-controls label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; color: #bbcdd6; }
+#simOutput { font-variant-numeric: tabular-nums; }
+#simJson { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; color: #b4c6d0; }
+#simRound { font-size: clamp(18px, 3vw, 26px); text-transform: uppercase; letter-spacing: .12em; }
+#simCount { display: inline-block; min-width: 3ch; text-align: center; font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
+#simDenominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
+#simPhase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
+#simRate, #simElapsed { margin-top: 10px; font-size: .9rem; color: #fff; font-variant-numeric: tabular-nums; }

@@ -40,6 +40,21 @@ jobs:
           const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
           const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
           if (duplicates.length) throw new Error('Duplicate HTML IDs: ' + [...new Set(duplicates)].join(', '));
+          // Every element app.js looks up must exist in the page.
+          const app = fs.readFileSync('app.js', 'utf8');
+          const wanted = [...app.match(/const ids=\[([\s\S]*?)\]/)[1].matchAll(/'([^']+)'/g)].map(match => match[1]);
+          const missing = wanted.filter(id => !ids.includes(id));
+          if (missing.length) throw new Error('app.js looks up IDs missing from index.html: ' + missing.join(', '));
+          // The Content Security Policy forbids inline style, so no page or
+          // script may inject one; the banner and sim styles live in styles.css.
+          for (const file of ['index.html', 'sim.html']) {
+            const content = fs.readFileSync(file, 'utf8');
+            if (content.includes('<style') || content.includes('style="')) throw new Error('Inline style in ' + file + ' would be blocked by the Content Security Policy');
+            if (!content.includes('<meta http-equiv="Content-Security-Policy"')) throw new Error('Missing Content Security Policy in ' + file);
+          }
+          for (const file of ['app.js', 'core.js', 'sim.js', 'sw.js', 'update-manager.js']) {
+            if (fs.readFileSync(file, 'utf8').includes("createElement('style')")) throw new Error('Injected <style> in ' + file + ' would be blocked by the Content Security Policy');
+          }
           for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
             const asset = match[1];
             if (/^(?:https?:|data:|#)/i.test(asset)) continue;

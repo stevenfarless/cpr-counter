@@ -207,6 +207,26 @@ test('a freeze over a second faults the session', async ({ page }) => {
   await expect(page.locator('#action')).toHaveText('Restart session');
 });
 
+test('a six-digit continuous count does not overflow the panel', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 320, height: 600 } });
+  const page = await context.newPage();
+  await page.goto('/');
+  // A continuous session passes 99,999 cues at ~14 hours; the count must
+  // shrink instead of spilling out of the panel.
+  await page.evaluate(() => {
+    const count = document.getElementById('count');
+    count.textContent = '123456';
+    count.dataset.digits = '6';
+  });
+  const fits = await page.evaluate(() => {
+    const count = document.getElementById('count').getBoundingClientRect();
+    const panel = document.getElementById('panel').getBoundingClientRect();
+    return count.left >= panel.left && count.right <= panel.right;
+  });
+  expect(fits).toBe(true);
+  await context.close();
+});
+
 test('duplicate session in a second window is rejected in plain language with a Restart label', async ({ page, context }) => {
   await page.goto('/');
   await startAtBpm(page, 120);

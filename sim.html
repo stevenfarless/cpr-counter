@@ -4,23 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="description" content="Development-only simulation harness for CPR Counter transition testing. Synthetic scenarios only.">
   <link rel="stylesheet" href="styles.css">
   <title>CPR Counter — Simulation (development only)</title>
   <script src="core.js" defer></script>
-  <style>
-    .sim-note { border: 2px dashed #d6ad78; border-radius: 12px; padding: 12px 14px; margin: 16px 0; font-size: .9rem; line-height: 1.6; color: #dfc69e; }
-    .sim-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
-    .sim-controls button { min-height: 48px; }
-    .sim-controls label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; color: #bbcdd6; }
-    #simOutput { font-variant-numeric: tabular-nums; }
-    #simJson { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; color: #b4c6d0; }
-    #simRound { font-size: clamp(18px, 3vw, 26px); text-transform: uppercase; letter-spacing: .12em; }
-    #simCount { display: inline-block; min-width: 3ch; text-align: center; font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
-    #simDenominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
-    #simPhase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
-    #simRate, #simElapsed { margin-top: 10px; font-size: .9rem; color: #fff; font-variant-numeric: tabular-nums; }
-  </style>
 </head>
 <body>
 <main>
