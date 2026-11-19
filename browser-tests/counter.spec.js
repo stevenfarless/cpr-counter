@@ -260,9 +260,7 @@ test('pending-update banner reserves its space and never moves the controls', as
     const r = document.querySelector(s).getBoundingClientRect();
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   }, sel);
-  // The release updater is not loaded by the normal page; load it the way
-  // the release kit does and check the banner it creates.
-  await page.addScriptTag({ path: 'update-manager.js' });
+  // The updater loads with the page and creates the banner on startup.
   await page.waitForSelector('#releaseBanner', { state: 'attached' });
   const banner = await rect('#releaseBanner');
   expect(banner.height).toBeGreaterThan(0);
