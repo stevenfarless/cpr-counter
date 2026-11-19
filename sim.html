@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Development-only simulation harness for CPR Counter transition testing. Synthetic scenarios only.">
+  <link rel="stylesheet" href="styles.css">
+  <title>CPR Counter — Simulation (development only)</title>
+  <script src="core.js" defer></script>
+  <style>
+    .sim-note { border: 2px dashed #d6ad78; border-radius: 12px; padding: 12px 14px; margin: 16px 0; font-size: .9rem; line-height: 1.6; color: #dfc69e; }
+    .sim-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+    .sim-controls button { min-height: 48px; }
+    .sim-controls label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; color: #bbcdd6; }
+    #simOutput { font-variant-numeric: tabular-nums; }
+    #simJson { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; color: #b4c6d0; }
+    #simRound { font-size: clamp(18px, 3vw, 26px); text-transform: uppercase; letter-spacing: .12em; }
+    #simCount { display: inline-block; min-width: 3ch; text-align: center; font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
+    #simDenominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
+    #simPhase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
+    #simRate, #simElapsed { margin-top: 10px; font-size: .9rem; color: #fff; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>CPR Counter — Simulation</h1>
+      <span class="sub">Development only · synthetic scenarios · not the normal app</span>
+    </div>
+  </header>
+
+  <p class="sim-note"><strong>Simulation harness — development only.</strong> This page drives only the
+  pure timing model (<code>CadenceCore.snapshot</code>) with synthetic elapsed times. It starts no
+  session, plays no audio, holds no lock, writes nothing to storage, and cannot change normal
+  session counts or timing. Use synthetic scenarios only; do not enter caller or patient data.
+  This page is not linked from the app, is not cached by the service worker, and is not part
+  of the normal app route.</p>
+
+  <section id="panel" aria-label="Simulated metronome visual cue">
+    <div id="pulse" aria-hidden="true"></div>
+    <div id="simRound">Round 1</div>
+    <div class="count"><span id="simCount">—</span><span id="simDenominator"> / 30</span></div>
+    <div id="simPhase">Ready</div>
+    <div id="simRate">110 compressions / min</div>
+    <div id="simElapsed">Elapsed: 0.0 s</div>
+  </section>
+
+  <div class="sim-controls">
+    <label>BPM
+      <input id="simBpm" type="number" min="100" max="120" step="1" value="110" aria-label="Simulated compressions per minute">
+    </label>
+    <label>Mode
+      <select id="simMode">
+        <option value="cycles">30:2 · Manual resume</option>
+        <option value="continuous">Continuous cadence</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="sim-controls">
+    <button id="simCue28" type="button">Start at cue 28</button>
+    <button id="simBoundary" type="button">Show cue 30 boundary</button>
+    <button id="simBreath" type="button">Show breath phase</button>
+    <button id="simContinuous45" type="button">Continuous cue 45</button>
+    <button id="simPreview" type="button" aria-pressed="false">Run live preview</button>
+    <button id="simReset" type="button">Reset scenario</button>
+  </div>
+
+  <p id="simOutput" role="status" aria-live="polite">Scenario: ready. Pick a scenario above, or run the live preview.</p>
+  <p id="simJson" aria-hidden="true"></p>
+
+  <section class="detail-section" aria-labelledby="simHelp">
+    <h2 id="simHelp">How to reset</h2>
+    <p>Reset scenario stops the live preview and returns the display to cue 0, round 1, with no
+    elapsed time. Re-picking a scenario replaces the previous one; scenarios never carry over
+    into the normal app, which is a separate page with its own state.</p>
+  </section>
+
+  <footer>CPR Counter · Simulation — development only · Unvalidated prototype</footer>
+</main>
+<script src="sim.js" defer></script>
+</body>
+</html>

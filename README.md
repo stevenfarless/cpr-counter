@@ -34,9 +34,11 @@ The implementation includes or is being developed around:
 
 - A default cadence of 110 cues per minute, adjustable from 100 to 120.
 - A large numeric cue counter and round indicator.
-- Independently selectable sound and visual pulses, including counter-only operation.
+- Independently selectable sound and visual pulses, including counter-only operation (shown as "Counter only" in the configuration summary).
 - A continuous-cadence mode.
 - A 30-cue mode with a dispatcher-controlled breath phase and manual resume.
+- A breath timer showing whole seconds since the last scheduled compression cue, with a Settings option to hide it.
+- Settings that collapse into a summary line (BPM, mode, outputs) when a session starts.
 - Coordinated color themes with teal as the default.
 - Installable PWA packaging and cached offline operation.
 - Technical information and maintenance controls inside a collapsed App details section.
@@ -65,6 +67,16 @@ python -m http.server 8000 --bind 127.0.0.1
 ```
 
 Open `http://localhost:8000` in your browser. Production-style PWA evaluation should use the project’s HTTPS deployment. Opening the HTML file directly is not a supported way to evaluate service-worker installation or offline behavior.
+
+## Tests
+
+```bash
+npm test
+```
+
+This runs the timing-model checks (`node core-tests.cjs`) and the browser behavior tests (`browser-tests/counter.spec.js`, via Playwright). The browser tests assert behavior in a real Chromium instance: cue progression, the cue 30 boundary, the breath phase with no automatic resume, Stop preservation and new-session reset, counter-only operation, computed panel-text colors and contrast in every theme, layout stability across counts, touch targets, and short-landscape/narrow-portrait layouts. They do not verify actual speaker or display delivery, or clinical readiness.
+
+A development-only simulation harness lives at `sim.html`. It drives only the pure timing model with synthetic elapsed times (for example, starting at cue 28 or showing the breath phase) so transitions can be inspected repeatedly without starting a session. It is not linked from the app, is not cached by the service worker, starts no session, plays no audio, and stores nothing. See the page itself for how to reset a scenario.
 
 This setup is for development and nonclinical evaluation only.
 

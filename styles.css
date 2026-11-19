@@ -39,11 +39,22 @@ h1 { margin: 0 0 5px; font-size: 1rem; letter-spacing: .13em; text-transform: up
 #panel.breath { border-color: #d6ad78; background: #352e24; }
 #round { font-size: clamp(18px, 3vw, 26px); text-transform: uppercase; letter-spacing: .12em; }
 .count { line-height: 1.1; margin: 6px 0; font-variant-numeric: tabular-nums; }
-#count { font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
+#count { display: inline-block; min-width: 3ch; text-align: center; font-size: clamp(90px, 15vw, 160px); font-weight: 650; letter-spacing: -.05em; }
+/* Long continuous counts shrink instead of overflowing the panel. */
+#count[data-digits="3"] { font-size: clamp(64px, 11vw, 110px); }
+#count[data-digits="4"] { font-size: clamp(48px, 9vw, 84px); }
 #denominator { font-size: clamp(24px, 5vw, 42px); color: #cad8df; }
 #phase { font-size: clamp(18px, 3vw, 26px); font-weight: 600; text-align: center; padding: 0 14px; }
 #rateLabel,#breathTime{margin-top:10px;font-size:.9rem;color:#fff;font-variant-numeric:tabular-nums;}
+#breathTime{min-height:1.35em;}
+/* Visibility (not display) reserves the space so showing/hiding the
+   denominator or breath timer never moves the counter or controls. */
+.vis-hidden{visibility:hidden;}
 .transport { display: grid; grid-template-columns: 3fr 1fr; gap: 12px; }
+/* Primary controls: measured touch targets are the 65px-tall primary
+   button and the full-row-height Stop button (48px minimum), separated
+   by a 12px gap. Text selection is off on these buttons only. */
+.transport button { user-select: none; -webkit-user-select: none; }
 button, input, select { font: inherit; }
 button, select, input[type="number"] {
   border: 1px solid #526977;
@@ -64,9 +75,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .primary.resume { background: #e2bd8d; color: #302315; border-color: #e2bd8d; }
 #stop { font-weight: 700; }
 #message { min-height: 2.9em; font-size: .9rem; line-height: 1.5; color: #dfc69e; margin: 15px 0; }
-.settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+#configSummary { font-size: .85rem; color: #bbcdd6; margin: 0 0 10px; overflow-wrap: anywhere; }
+#settingsDetails { border-top: 1px solid #30434e; margin-top: 4px; }
+#settingsDetails > summary { padding: 12px 2px; cursor: pointer; color: #b7c8d2; font-size: .9rem; width: fit-content; }
+.settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding-bottom: 6px; }
 .settings label { display: flex; flex-direction: column; gap: 8px; font-size: .85rem; color: #bbcdd6; min-width: 0; }
 .settings select { width: 100%; min-width: 0; }
+.checkControl { display: flex; align-items: center; gap: 8px; min-height: 48px; }
+.checkControl input { width: 20px; height: 20px; accent-color: var(--button); flex: none; }
 .bpmControl, .gainControl { display: flex; align-items: center; gap: 8px; min-height: 48px; }
 .bpmControl input { width: 78px; text-align: center; appearance: textfield; }
 .bpmControl input::-webkit-inner-spin-button { appearance: none; }
@@ -103,6 +119,27 @@ body[data-theme="amber"] { --cue: #886b43; --edge: #c9ab7b; --button: #e0c598; }
 @media (max-width: 410px) {
   .settings { grid-template-columns: 1fr; }
   .sub { font-size: .7rem; }
+}
+
+/* Short landscape (e.g. phone held sideways, ~360px tall): shrink the panel
+   so the counter and Start/Stop stay reachable without scrolling. Settings
+   start collapsed in this layout (see app.js). */
+@media (max-height: 520px) and (orientation: landscape) {
+  body { padding: 10px 14px; }
+  header { margin-bottom: 0; }
+  h1 { margin-bottom: 2px; }
+  #panel { min-height: 0; height: auto; padding: 8px 0; margin: 8px 0; }
+  #round { font-size: 16px; }
+  #count { font-size: clamp(56px, 12vh, 84px); }
+  #count[data-digits="3"] { font-size: clamp(44px, 10vh, 64px); }
+  #count[data-digits="4"] { font-size: clamp(36px, 9vh, 52px); }
+  #denominator { font-size: 20px; }
+  #phase { font-size: 16px; }
+  #rateLabel, #breathTime { margin-top: 4px; }
+  .primary { min-height: 56px; font-size: 1.1rem; }
+  #message { min-height: 1.5em; margin: 8px 0; }
+  #configSummary { margin-bottom: 6px; }
+  #settingsDetails > summary { padding: 8px 2px; }
 }
 
 /* Hide Full screen on mobile/tablet layouts and touch-first devices. */

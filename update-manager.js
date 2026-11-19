@@ -1,13 +1,13 @@
 /* CPR Counter update UI. Loaded after app.js; relies on the original app globals. */
 'use strict';
 (() => {
- const RELEASE='2.1.0', PROTOCOL=1;
+ const RELEASE='2.2.0', PROTOCOL=1;
  let reg=null, checking=false, applying=false, pending=null;
  const details=document.getElementById('appDetails')||document.querySelector('main details');
  const main=document.querySelector('main');
  if(!details||!main)return;
  const style=document.createElement('style');
- style.textContent=`#releaseBanner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #7baeb0;background:#1b3338;border-radius:12px;padding:10px 14px;margin:16px 0;font-size:.9rem}#releaseBanner[hidden]{display:none!important}#releaseBanner button{min-height:40px;padding:8px 14px}.release-controls{margin:14px 0}.release-status{font-size:.82rem;line-height:1.5;color:#b4c6d0;min-height:1.5em}`;
+ style.textContent=`#releaseBanner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #7baeb0;background:#1b3338;border-radius:12px;padding:10px 14px;margin:16px 0;min-height:58px;font-size:.9rem}#releaseBanner button{min-height:40px;padding:8px 14px}.release-controls{margin:14px 0}.release-status{font-size:.82rem;line-height:1.5;color:#b4c6d0;min-height:1.5em}`;
  document.head.append(style);
  const banner=document.createElement('div');banner.id='releaseBanner';banner.hidden=true;
  const label=document.createElement('span');label.setAttribute('role','status');label.setAttribute('aria-live','polite');
@@ -37,7 +37,10 @@
   for(let i=0;i<3;i++){if(aa[i]!==bb[i])return aa[i]>bb[i];}return false;
  }
  function draw(){
-  banner.hidden=!pending;apply.hidden=!pending;
+  // Reserve the banner's space (visibility, not display) so a pending
+  // update appearing never moves the counter or primary controls.
+  banner.hidden=false;banner.style.visibility=pending?'visible':'hidden';
+  apply.hidden=!pending;
   if(!pending)return;
   apply.disabled=busy()||applying;
   apply.textContent=applying?'Updating…':'Update now';
@@ -108,6 +111,7 @@
  });
  check.addEventListener('click',()=>checkUpdates(true));
  offlineButton?.addEventListener('click',verifyOffline);
+ draw();
  // Observe the app's Stop state changes without replacing its control handlers.
  new MutationObserver(draw).observe(document.getElementById('stop'),{attributes:true,attributeFilter:['disabled']});
  async function init(){

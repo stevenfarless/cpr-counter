@@ -1,6 +1,6 @@
 /* CPR Counter release worker. Deploy all files atomically. */
 'use strict';
-const VERSION='2.1.0',PROTOCOL=1,CACHE='cpr-counter-'+VERSION;
+const VERSION='2.2.0',PROTOCOL=1,CACHE='cpr-counter-'+VERSION;
 const ASSETS=['./','./index.html','./styles.css','./core.js','./app.js','./update-manager.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 const absolute=p=>new URL(p,self.registration.scope).href;
 async function info(){
@@ -38,8 +38,11 @@ self.addEventListener('fetch',event=>{
  const request=event.request,u=new URL(request.url);
  if(request.method!=='GET'||u.origin!==self.location.origin||!u.href.startsWith(self.registration.scope))return;
  event.respondWith((async()=>{
-  const cache=await caches.open(CACHE),key=request.mode==='navigate'?absolute('./index.html'):request;
-  return await cache.match(key)||fetch(request);
+  // Storage can be unavailable or corrupted; preserve online loading when cache access fails.
+  try{
+   const cache=await caches.open(CACHE),key=request.mode==='navigate'?absolute('./index.html'):request;
+   return await cache.match(key)||fetch(request);
+  }catch{return fetch(request);}
  })());
 });
 // Retain previous caches while old clients may still use them.
