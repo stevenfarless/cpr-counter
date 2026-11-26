@@ -391,8 +391,9 @@ test('CPR reference and FAQ are present in the offline-cached application page',
   await page.goto('/');
   const reference = page.locator('#referenceDetails');
   await expect(reference).toBeAttached();
-  await expect(reference.locator('summary')).toHaveText('CPR reference & frequently asked questions');
-  await reference.locator('summary').click();
+  const referenceSummary = reference.locator(':scope > summary');
+  await expect(referenceSummary).toHaveText('CPR reference & frequently asked questions');
+  await referenceSummary.click();
   await expect(reference).toContainText('100–120 compressions per minute');
   await expect(reference).toContainText('Hands-Only CPR');
   await expect(reference).toContainText('25 November 2026');
