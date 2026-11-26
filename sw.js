@@ -1,6 +1,6 @@
 /* CPR Counter release worker. Deploy all files atomically. */
 'use strict';
-const VERSION='2.3.0',PROTOCOL=1,CACHE='cpr-counter-'+VERSION;
+const VERSION='2.4.0',PROTOCOL=1,CACHE='cpr-counter-'+VERSION;
 const ASSETS=['./','./index.html','./styles.css','./core.js','./app.js','./update-manager.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 const absolute=p=>new URL(p,self.registration.scope).href;
 async function info(){

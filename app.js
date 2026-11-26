@@ -2,7 +2,7 @@
    Counter-only operation is allowed. Compatible with the optional update-manager.js.
    Unvalidated prototype: requires browser and workstation validation. */
 'use strict';
-const VERSION='2.3.0', Core=globalThis.CadenceCore;
+const VERSION='2.4.0', Core=globalThis.CadenceCore;
 const ids=['offline','network','lockStatus','panel','pulse','round','count','denominator','phase','rateLabel','breathTime','action','stop','message','configSummary','settingsDetails','bpm','minus','plus','mode','theme','sound','visual','volume','gainValue','showBreathTime','testSound','install','fullscreen','update','refreshOffline'];
 const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
 let state='idle',round=1,count=0,mode='cycles',sound=false,visual=true;

@@ -1,7 +1,7 @@
 /* CPR Counter update UI. Loaded after app.js; relies on the original app globals. */
 'use strict';
 (() => {
- const RELEASE='2.3.0', PROTOCOL=1;
+ const RELEASE='2.4.0', PROTOCOL=1;
  let reg=null, checking=false, applying=false, pending=null;
  const details=document.getElementById('appDetails')||document.querySelector('main details');
  const main=document.querySelector('main');

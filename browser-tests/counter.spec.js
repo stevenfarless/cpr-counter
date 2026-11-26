@@ -344,7 +344,7 @@ test('service worker keeps only the current and previous version caches', async 
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   // Seed the caches past releases left behind.
   await page.evaluate(async () => {
-    for (const v of ['2.0.0', '2.1.0', '2.2.0']) {
+    for (const v of ['2.0.0', '2.1.0', '2.2.0', '2.3.0']) {
       const c = await caches.open('cpr-counter-' + v);
       await c.put('/seed-' + v, new Response('seed'));
     }
@@ -357,13 +357,14 @@ test('service worker keeps only the current and previous version caches', async 
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   const names = await page.evaluate(() => caches.keys());
-  expect(names).toContain('cpr-counter-2.3.0');
-  expect(names).toContain('cpr-counter-2.2.0'); // previous release kept
+  expect(names).toContain('cpr-counter-2.4.0'); // current release
+  expect(names).toContain('cpr-counter-2.3.0'); // previous release kept
+  expect(names).not.toContain('cpr-counter-2.2.0');
   expect(names).not.toContain('cpr-counter-2.1.0');
   expect(names).not.toContain('cpr-counter-2.0.0');
   // The pruned caches are gone, the kept ones still serve, and the app
   // still works offline after the cleanup.
-  await page.evaluate(() => caches.open('cpr-counter-2.2.0').then((c) => c.match('/seed-2.2.0').then((r) => r.text())));
+  await page.evaluate(() => caches.open('cpr-counter-2.3.0').then((c) => c.match('/seed-2.3.0').then((r) => r.text())));
   await expect(page.locator('#action')).toHaveText('Start round 1');
 });
 
@@ -383,4 +384,30 @@ test('simulation harness is isolated: scenarios work, normal app is untouched', 
   expect(sw).not.toContain('sim.html');
   const index = await page.evaluate(() => fetch('/index.html').then((r) => r.text()));
   expect(index).not.toContain('sim.html');
+});
+
+
+test('CPR reference and FAQ are present in the application page', async ({ page }) => {
+  await page.goto('/');
+  const reference = page.locator('#referenceDetails');
+  await expect(reference).toBeAttached();
+  const referenceSummary = reference.locator(':scope > summary');
+  await expect(referenceSummary).toHaveText('CPR reference & frequently asked questions');
+  await referenceSummary.click();
+  await expect(reference).toContainText('100–120 compressions per minute');
+  await expect(reference).toContainText('Hands-Only CPR');
+  await expect(reference).toContainText('25 November 2026');
+  await expect(reference.locator('a[href^="https://"]')).toHaveCount(6);
+});
+
+test('App details explain cue counts, both modes, Stop, Resume, and timing interruptions', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#appDetails summary').click();
+  const details = page.locator('#countingHelp').locator('..');
+  await expect(details).toContainText('scheduled metronome cue');
+  await expect(details).toContainText('Continuous cadence');
+  await expect(details).toContainText('Start afterward begins a new session');
+  await expect(details).toContainText('does not time or confirm two breaths');
+  await expect(details).toContainText('400 ms ahead');
+  await expect(details).toContainText('frozen browser');
 });

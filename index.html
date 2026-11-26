@@ -110,8 +110,15 @@
 
     <section class="detail-section" aria-labelledby="countingHelp">
       <h2 id="countingHelp">Counting &amp; controls</h2>
-      <p>Counts scheduled metronome cues. Caller compressions and breaths are not detected. In 30:2 mode, click Resume compressions when the caller reports returning to compressions. The round advances on that click. Stop preserves the last display; a new Start resets the session. The breath timer, when shown, counts whole seconds since the last scheduled compression cue; it can be hidden in Settings without changing timing or resume behavior, and it does not detect breaths.</p>
-      <p>Fresh launches are stopped, muted, 110 BPM, visual pulse on, and 30:2 mode. Only color and audio gain are saved. A breath phase never automatically restarts compressions. There are no global keyboard shortcuts; focused controls accept normal keyboard activation.</p>
+      <ul>
+        <li><strong>What a count means:</strong> Each number represents a scheduled metronome cue. The app does not hear, see, detect, or verify a caller's compressions or breaths.</li>
+        <li><strong>30:2 · Manual resume:</strong> The counter schedules 30 cues, then enters a breath phase. It displays 30 while waiting. Press <strong>Resume compressions</strong> when the caller reports returning to compressions. That action starts the next round at cue 1. The app does not time or confirm two breaths.</li>
+        <li><strong>Continuous cadence:</strong> Cues continue without a 30-cue pause or breath phase. The displayed count continues increasing for the session.</li>
+        <li><strong>Stop and Start:</strong> Stop ends the active session and preserves the displayed round and count. Pressing Start afterward begins a new session at round 1 and cue 1. The app does not collect session statistics.</li>
+        <li><strong>Breath timer:</strong> During the breath phase, the optional display shows whole seconds since scheduled cue 30. It is not a breath timer and does not measure when breaths occur. Hiding it changes only its display.</li>
+      </ul>
+      <p>Fresh launches start stopped, muted, at 110 BPM, with visual pulse on and 30:2 mode selected. Color, audio gain, and the breath-timer visibility preference are saved locally. A breath phase never automatically restarts compressions. There are no global keyboard shortcuts; focused controls accept normal keyboard activation.</p>
+      <p><strong>Timing and interruption behavior:</strong> The app schedules audio cues up to 400 ms ahead. It stops if a cue is detected as missed, if the page becomes hidden, or if the audio clock is interrupted. A main-thread delay over 250 ms is tolerated once; a second such delay within five seconds or a delay over one second stops the session. A frozen browser cannot immediately process Stop or display a fault. Device sleep, browser suspension, and audio-device behavior vary, so these safeguards require workstation testing.</p>
     </section>
 
     <section class="detail-section" aria-labelledby="safetyHelp">
@@ -128,6 +135,69 @@
     </section>
   </details>
 
+  <details id="referenceDetails">
+    <summary>CPR reference &amp; frequently asked questions</summary>
+    <div class="detail-section">
+      <p><strong>Scope:</strong> This is a brief educational reference for general adult bystander CPR. It is not a dispatcher protocol, clinical decision aid, or substitute for training. Follow agency-approved instructions and current guidance for the person and situation.</p>
+      <h2>Adult compression fundamentals</h2>
+      <ul>
+        <li><strong>Rate:</strong> 100–120 compressions per minute.</li>
+        <li><strong>Depth:</strong> At least 2 inches (5 cm) for an average adult, while avoiding depths greater than 2.4 inches (6 cm).</li>
+        <li><strong>Hand placement:</strong> Heel of one hand on the center of the chest over the lower half of the breastbone; place the other hand on top.</li>
+        <li><strong>Recoil:</strong> Allow the chest to return fully after each compression. Avoid leaning on the chest between compressions.</li>
+        <li><strong>Interruptions:</strong> Keep pauses as short as possible. The Red Cross advises keeping interruptions under 10 seconds.</li>
+      </ul>
+      <h2>Basic adult response sequence</h2>
+      <ol>
+        <li>Make sure the scene is safe and check for responsiveness.</li>
+        <li>If the person is unresponsive and not breathing normally or is only gasping, activate emergency response and send someone to get an AED. Follow the emergency call-taker's instructions.</li>
+        <li>Begin CPR. For a trained responder providing conventional adult CPR, use 30 compressions followed by 2 breaths. An adult bystander who witnesses a sudden collapse may use Hands-Only CPR.</li>
+        <li>As soon as an AED is available, turn it on, attach the pads as shown, and follow its voice and visual prompts. Resume CPR when instructed.</li>
+      </ol>
+      <h2>Hands-Only CPR and rescue breaths</h2>
+      <p>Hands-Only CPR means continuous chest compressions without mouth-to-mouth breaths. The AHA recommends it for bystanders who witness a teen or adult suddenly collapse outside a hospital. Conventional CPR with breaths remains important in other circumstances and for trained rescuers. For infants and children, the 2025 AHA/AAP guidance recommends conventional CPR with breaths; one rescuer uses 30:2 and two rescuers use 15:2. The pediatric guidelines also specify age-appropriate compression depth and infant hand technique. Drowning is a special circumstance: current Red Cross guidance recommends rescue breaths as part of CPR, including for adults. Use current age- and situation-specific training and dispatcher/agency protocols; do not apply adult Hands-Only guidance to these cases.</p>
+      <h2>Frequently asked questions</h2>
+      <details>
+        <summary>Why is the adult compression rate 100–120 per minute?</summary>
+        <p>This is the rate range recommended by the AHA and Red Cross for adult CPR. A cadence cue can help a rescuer keep a steady pace; the app cannot determine whether compressions are effective.</p>
+      </details>
+      <details>
+        <summary>Why does full chest recoil matter?</summary>
+        <p>The chest needs to return to its normal position between compressions. Avoiding pressure between pushes supports the heart's refilling between compressions.</p>
+      </details>
+      <details>
+        <summary>Why is adult compression depth specified?</summary>
+        <p>Compressions must be deep enough to move blood during cardiac arrest. For an average adult, the AHA recommends at least 2 inches (5 cm), while avoiding excessive depth beyond 2.4 inches (6 cm).</p>
+      </details>
+      <details>
+        <summary>When are rescue breaths recommended?</summary>
+        <p>Trained rescuers should use the CPR approach appropriate to their training and the situation. Breaths are especially important in pediatric and respiratory-related emergencies, drowning, and other circumstances where oxygen deprivation may be involved. Follow current guidance for the patient's age and cause.</p>
+      </details>
+      <details>
+        <summary>When is Hands-Only CPR appropriate?</summary>
+        <p>It is intended for a bystander who witnesses a sudden collapse in a teen or adult outside a hospital. It should not be generalized to infants, children, drowning, or every cause of cardiac arrest.</p>
+      </details>
+      <details>
+        <summary>When and how should an AED be used?</summary>
+        <p>Use an AED as soon as it is available. Turn it on, expose the chest, apply the pads according to their diagrams, and follow the device prompts. Do not touch the person during analysis or a shock; resume CPR when the AED instructs you to do so.</p>
+      </details>
+      <details>
+        <summary>Why should interruptions be minimized?</summary>
+        <p>Blood flow generated by compressions falls when compressions stop. Keep pauses brief and resume compressions promptly after breaths, AED analysis, or other necessary actions, following the AED and responder instructions.</p>
+      </details>
+      <h2>Sources and review</h2>
+      <p>Clinical statements reviewed 25 November 2026. Sources consulted:</p>
+      <ul>
+        <li><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/adult-basic-life-support/" target="_blank" rel="noopener noreferrer">American Heart Association, 2025 Guidelines: Adult Basic Life Support</a> — adult compression rate, depth, hand placement, recoil, and ventilation.</li>
+        <li><a href="https://cpr.heart.org/En/Resources/What-Is-Cpr" target="_blank" rel="noopener noreferrer">American Heart Association, What Is CPR?</a> — conventional CPR and Hands-Only CPR scope.</li>
+        <li><a href="https://www.redcross.org/take-a-class/cpr/performing-cpr/cpr-steps" target="_blank" rel="noopener noreferrer">American Red Cross, CPR Steps</a> — adult response sequence, compression technique, breaths, AED, and interruption guidance.</li>
+        <li><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-basic-life-support/" target="_blank" rel="noopener noreferrer">American Heart Association and American Academy of Pediatrics, 2025 Pediatric Basic Life Support Guidelines</a> — pediatric CPR with breaths, rescuer ratios, compression depth, and infant technique.</li>
+        <li><a href="https://guidelines.redcross.org/guidelines-database/appendix-b-summary-of-reaffirmed-guidelines-recommendations/" target="_blank" rel="noopener noreferrer">American Red Cross Scientific Advisory Council, 2025 Reaffirmed Guidelines: Drowning Process Resuscitation</a> — rescue-breath requirements in drowning-related cardiac arrest.</li>
+        <li><a href="https://www.redcross.org/take-a-class/cpr/performing-cpr/child-baby-cpr" target="_blank" rel="noopener noreferrer">American Red Cross, Child and Baby CPR</a> — public-facing pediatric CPR reference.</li>
+      </ul>
+      <p>Guidance can change. This summary may omit important exceptions. It is not a substitute for current certified training, medical direction, emergency dispatcher instructions, or agency-approved protocols.</p>
+    </div>
+  </details>
   <footer>CPR Counter · Unvalidated prototype</footer>
 </main>
 </body>

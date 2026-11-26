@@ -2,8 +2,8 @@
 
 A visual and optional audio counter intended to explore CPR cadence support for dispatchers.
 
-Project: https://github.com/stevenfarless/cprcounter  
-Demo: https://stevenfarless.github.io/cprcounter/
+Project: https://github.com/stevenfarless/cpr-counter  
+Demo: https://stevenfarless.github.io/cpr-counter/
 
 > [!CAUTION]
 > PROTOTYPE — ACTIVE DEVELOPMENT — NOT FOR EMERGENCY USE
@@ -46,9 +46,13 @@ The implementation includes or is being developed around:
 
 Availability and behavior depend on the deployed version. This list is not a statement that these features have been validated.
 
+## CPR reference content
+
+The app includes a compact, offline-capable adult CPR reference and FAQ. Its clinical scope, source links, and review date are shown in the app. The content is educational and does not establish clinical readiness or replace dispatcher instructions, training, medical direction, or agency protocols. Pediatric and special-circumstance CPR require separate age- and situation-specific guidance.
+
 ## What the counter represents
 
-The displayed count follows the application’s scheduled cues. The application does not detect or confirm:
+The displayed count follows the application's scheduled cues. In 30:2 mode, the app enters a manual breath phase after 30 scheduled cues and waits for the operator to press Resume compressions. Continuous mode has no automatic 30-cue pause. Stop preserves the current display; the next Start begins a new session at round 1 and cue 1. No session statistics are collected. The application does not detect or confirm:
 
 - Compressions actually performed by a caller or rescuer.
 - Compression depth, recoil, placement, or effectiveness.
