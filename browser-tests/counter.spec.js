@@ -384,3 +384,37 @@ test('simulation harness is isolated: scenarios work, normal app is untouched', 
   const index = await page.evaluate(() => fetch('/index.html').then((r) => r.text()));
   expect(index).not.toContain('sim.html');
 });
+
+
+test('CPR reference and FAQ are present in the offline-cached application page', async ({ page }) => {
+  await page.goto('/');
+  const reference = page.locator('#referenceDetails');
+  await expect(reference).toBeAttached();
+  await expect(reference.locator('summary')).toHaveText('CPR reference & frequently asked questions');
+  await reference.locator('summary').click();
+  await expect(reference).toContainText('100–120 compressions per minute');
+  await expect(reference).toContainText('Hands-Only CPR');
+  await expect(reference).toContainText('25 November 2026');
+  await expect(reference.locator('a[href^="https://"]')).toHaveCount(5);
+  await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
+  const cached = await page.evaluate(async () => {
+    const keys = await caches.keys();
+    const cache = await caches.open(keys.find(key => key.startsWith('cpr-counter-')));
+    const response = await cache.match(new URL('./index.html', location.href).href);
+    return response ? response.text() : '';
+  });
+  expect(cached).toContain('CPR reference &amp; frequently asked questions');
+  expect(cached).toContain('American Heart Association, 2025 Guidelines');
+});
+
+test('App details explain cue counts, both modes, Stop, Resume, and timing interruptions', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#appDetails summary').click();
+  const details = page.locator('#countingHelp').locator('..');
+  await expect(details).toContainText('scheduled metronome cue');
+  await expect(details).toContainText('Continuous cadence');
+  await expect(details).toContainText('Start afterward begins a new session');
+  await expect(details).toContainText('does not time or confirm two breaths');
+  await expect(details).toContainText('400 ms ahead');
+  await expect(details).toContainText('frozen browser');
+});
