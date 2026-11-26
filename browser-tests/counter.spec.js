@@ -400,8 +400,10 @@ test('CPR reference and FAQ are present in the offline-cached application page',
   await expect(reference.locator('a[href^="https://"]')).toHaveCount(6);
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   const cached = await page.evaluate(async () => {
-    const keys = await caches.keys();
-    const cache = await caches.open(keys.find(key => key.startsWith('cpr-counter-')));
+    // The previous release is intentionally retained, so selecting the
+    // first matching cache can read stale HTML depending on cache order.
+    // Read the current release cache explicitly.
+    const cache = await caches.open('cpr-counter-2.4.0');
     const response = await cache.match(new URL('./index.html', location.href).href);
     return response ? response.text() : '';
   });
