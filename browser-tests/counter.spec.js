@@ -395,7 +395,7 @@ test('CPR reference and FAQ are present in the offline-cached application page',
   await expect(reference).toContainText('100–120 compressions per minute');
   await expect(reference).toContainText('Hands-Only CPR');
   await expect(reference).toContainText('25 November 2026');
-  await expect(reference.locator('a[href^="https://"]')).toHaveCount(5);
+  await expect(reference.locator('a[href^="https://"]')).toHaveCount(7);
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   const cached = await page.evaluate(async () => {
     const keys = await caches.keys();
