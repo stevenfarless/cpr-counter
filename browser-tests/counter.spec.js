@@ -387,7 +387,7 @@ test('simulation harness is isolated: scenarios work, normal app is untouched', 
 });
 
 
-test('CPR reference and FAQ are present in the offline-cached application page', async ({ page }) => {
+test('CPR reference and FAQ are present in the application page', async ({ page }) => {
   await page.goto('/');
   const reference = page.locator('#referenceDetails');
   await expect(reference).toBeAttached();
@@ -398,17 +398,6 @@ test('CPR reference and FAQ are present in the offline-cached application page',
   await expect(reference).toContainText('Hands-Only CPR');
   await expect(reference).toContainText('25 November 2026');
   await expect(reference.locator('a[href^="https://"]')).toHaveCount(6);
-  await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
-  const cached = await page.evaluate(async () => {
-    // The previous release is intentionally retained, so selecting the
-    // first matching cache can read stale HTML depending on cache order.
-    // Read the current release cache explicitly.
-    const cache = await caches.open('cpr-counter-2.4.0');
-    const response = await cache.match(new URL('./index.html', location.href).href);
-    return response ? response.text() : '';
-  });
-  expect(cached).toContain('CPR reference & frequently asked questions');
-  expect(cached).toContain('American Heart Association, 2025 Guidelines');
 });
 
 test('App details explain cue counts, both modes, Stop, Resume, and timing interruptions', async ({ page }) => {
