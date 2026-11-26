@@ -344,7 +344,7 @@ test('service worker keeps only the current and previous version caches', async 
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   // Seed the caches past releases left behind.
   await page.evaluate(async () => {
-    for (const v of ['2.0.0', '2.1.0', '2.2.0']) {
+    for (const v of ['2.0.0', '2.1.0', '2.2.0', '2.3.0']) {
       const c = await caches.open('cpr-counter-' + v);
       await c.put('/seed-' + v, new Response('seed'));
     }
@@ -357,13 +357,14 @@ test('service worker keeps only the current and previous version caches', async 
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   const names = await page.evaluate(() => caches.keys());
-  expect(names).toContain('cpr-counter-2.3.0');
-  expect(names).toContain('cpr-counter-2.2.0'); // previous release kept
+  expect(names).toContain('cpr-counter-2.4.0'); // current release
+  expect(names).toContain('cpr-counter-2.3.0'); // previous release kept
+  expect(names).not.toContain('cpr-counter-2.2.0');
   expect(names).not.toContain('cpr-counter-2.1.0');
   expect(names).not.toContain('cpr-counter-2.0.0');
   // The pruned caches are gone, the kept ones still serve, and the app
   // still works offline after the cleanup.
-  await page.evaluate(() => caches.open('cpr-counter-2.2.0').then((c) => c.match('/seed-2.2.0').then((r) => r.text())));
+  await page.evaluate(() => caches.open('cpr-counter-2.3.0').then((c) => c.match('/seed-2.3.0').then((r) => r.text())));
   await expect(page.locator('#action')).toHaveText('Start round 1');
 });
 
@@ -395,7 +396,7 @@ test('CPR reference and FAQ are present in the offline-cached application page',
   await expect(reference).toContainText('100–120 compressions per minute');
   await expect(reference).toContainText('Hands-Only CPR');
   await expect(reference).toContainText('25 November 2026');
-  await expect(reference.locator('a[href^="https://"]')).toHaveCount(7);
+  await expect(reference.locator('a[href^="https://"]')).toHaveCount(6);
   await page.waitForFunction(() => document.getElementById('offline').textContent.includes('Offline files verified'), null, { timeout: 15000 });
   const cached = await page.evaluate(async () => {
     const keys = await caches.keys();
@@ -403,7 +404,7 @@ test('CPR reference and FAQ are present in the offline-cached application page',
     const response = await cache.match(new URL('./index.html', location.href).href);
     return response ? response.text() : '';
   });
-  expect(cached).toContain('CPR reference &amp; frequently asked questions');
+  expect(cached).toContain('CPR reference & frequently asked questions');
   expect(cached).toContain('American Heart Association, 2025 Guidelines');
 });
 
